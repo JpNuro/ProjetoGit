@@ -3,7 +3,6 @@ from tkinter import ttk, messagebox
 import random
 import json
 import os
-from PIL import Image, ImageTk
 import winsound
 
 class GeneralGame:
@@ -319,13 +318,15 @@ class GeneralGame:
             if self.available_sequences["General"] is None:
                 self.sequence_buttons["General"][1].config(text=f"{value} pontos")
                 self.sequence_buttons["General"][0].config(state='normal')
+                return
         
         # Quadra (4 dados iguais)
-        if max(counts.values()) >= 4:
+        if max(counts.values()) == 4:
             value = sum(self.current_dice)
             if self.available_sequences["Quadra"] is None:
                 self.sequence_buttons["Quadra"][1].config(text=f"{value} pontos")
                 self.sequence_buttons["Quadra"][0].config(state='normal')
+                return
         
         # Full House (3 + 2)
         values = list(counts.values())
@@ -334,6 +335,7 @@ class GeneralGame:
             if self.available_sequences["Full House"] is None:
                 self.sequence_buttons["Full House"][1].config(text=f"{value} pontos")
                 self.sequence_buttons["Full House"][0].config(state='normal')
+                return
         
         # Sequências
         if dice == [1,2,3,4,5]:
@@ -341,25 +343,29 @@ class GeneralGame:
             if self.available_sequences["Sequência Baixa"] is None:
                 self.sequence_buttons["Sequência Baixa"][1].config(text=f"{value} pontos")
                 self.sequence_buttons["Sequência Baixa"][0].config(state='normal')
+                return
         elif dice == [2,3,4,5,6]:
             value = sum(self.current_dice)
             if self.available_sequences["Sequência Alta"] is None:
                 self.sequence_buttons["Sequência Alta"][1].config(text=f"{value} pontos")
                 self.sequence_buttons["Sequência Alta"][0].config(state='normal')
+                return
         
         # Trinca (3 dados iguais)
-        if max(counts.values()) >= 3:
+        if max(counts.values()) == 3:
             value = sum(self.current_dice)
             if self.available_sequences["Trinca"] is None:
                 self.sequence_buttons["Trinca"][1].config(text=f"{value} pontos")
                 self.sequence_buttons["Trinca"][0].config(state='normal')
+                return
         
         # Par (2 dados iguais)
-        if max(counts.values()) >= 2:
+        if max(counts.values()) == 2:
             value = sum(self.current_dice)
             if self.available_sequences["Par"] is None:
                 self.sequence_buttons["Par"][1].config(text=f"{value} pontos")
                 self.sequence_buttons["Par"][0].config(state='normal')
+                return
 
     def end_game(self):
         """Finaliza o jogo"""
