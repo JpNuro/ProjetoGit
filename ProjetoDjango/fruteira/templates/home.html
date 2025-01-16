@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Fruteira{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Bem-vindo à Fruteira</h1>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Lista de Frutas</h5>
+                {% if frutas %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Preço</th>
+                                    <th>Quantidade em Estoque</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fruta in frutas %}
+                                <tr>
+                                    <td>{{ fruta.nome }}</td>
+                                    <td>R$ {{ fruta.preco }}</td>
+                                    <td>{{ fruta.quantidade }}</td>
+                                    <td>
+                                        <a href="{% url 'editar_fruta' fruta.id %}" class="btn btn-sm btn-primary">Editar</a>
+                                        <a href="{% url 'excluir_fruta' fruta.id %}" class="btn btn-sm btn-danger">Excluir</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">Nenhuma fruta cadastrada.</p>
+                {% endif %}
+                <a href="{% url 'cadastro_fruta' %}" class="btn btn-success mt-3">Cadastrar Nova Fruta</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
