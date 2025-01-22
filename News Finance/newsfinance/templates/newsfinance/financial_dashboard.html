@@ -1,0 +1,153 @@
+{% extends 'newsfinance/base.html' %}
+
+{% block title %}Financial Dashboard - News & Finance{% endblock %}
+
+{% block extra_css %}
+<style>
+    .indicator-card {
+        transition: all 0.3s ease;
+    }
+    .indicator-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .chart-container {
+        position: relative;
+        height: 400px;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Financial Dashboard</h2>
+        {% if last_update %}
+            <p class="text-muted">
+                <i class="fas fa-sync"></i> Last updated: {{ last_update|date:"d M Y H:i" }}
+            </p>
+        {% endif %}
+    </div>
+    <div class="col text-end">
+        <button id="refreshData" class="btn btn-primary">
+            <i class="fas fa-sync-alt"></i> Refresh Data
+        </button>
+    </div>
+</div>
+
+<!-- Market Overview Chart -->
+<div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0"><i class="fas fa-chart-line"></i> Market Overview</h5>
+    </div>
+    <div class="card-body">
+        <div class="chart-container">
+            <canvas id="marketOverviewChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Financial Indicators -->
+<div class="row">
+    {% for indicator in indicators %}
+        <div class="col-md-4 mb-4">
+            <div class="card indicator-card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ indicator.name }}</h5>
+                    <h3 class="mb-3">{{ indicator.current_value|floatformat:2 }}</h3>
+                    <p class="mb-0 {% if indicator.change_value >= 0 %}positive-change{% else %}negative-change{% endif %}">
+                        {% if indicator.change_value >= 0 %}
+                            <i class="fas fa-arrow-up"></i>
+                        {% else %}
+                            <i class="fas fa-arrow-down"></i>
+                        {% endif %}
+                        {{ indicator.change_value|floatformat:2 }} ({{ indicator.change_percentage|floatformat:2 }}%)
+                    </p>
+                    <small class="text-muted">{{ indicator.symbol }}</small>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No financial indicators available at the moment.
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Market Overview Chart
+    const ctx = document.getElementById('marketOverviewChart').getContext('2d');
+    const marketData = {
+        labels: [{% for indicator in indicators %}'{{ indicator.name }}',{% endfor %}],
+        datasets: [{
+            label: 'Current Value',
+            data: [{% for indicator in indicators %}{{ indicator.current_value }},{% endfor %}],
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    };
+
+    new Chart(ctx, {
+        type: 'line',
+        data: marketData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: false
+                }
+            }
+        }
+    });
+
+    // Refresh Data Button
+    document.getElementById('refreshData').addEventListener('click', function() {
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+
+        fetch('/api/indicators/refresh/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'refresh task started') {
+                setTimeout(() => window.location.reload(), 5000);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Data';
+        });
+    });
+
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
+{% endblock %}

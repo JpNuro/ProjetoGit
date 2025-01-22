@@ -1,0 +1,99 @@
+{% extends 'newsfinance/base.html' %}
+
+{% block title %}{{ category.name }} News - News & Finance{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'newsfinance:news_list' %}">Home</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    {{ category.name }}
+                </li>
+            </ol>
+        </nav>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>{{ category.name }} News</h2>
+            <span class="badge bg-primary">{{ news_list.count }} Articles</span>
+        </div>
+
+        {% if category.description %}
+            <div class="alert alert-info mb-4">
+                <i class="fas fa-info-circle"></i> {{ category.description }}
+            </div>
+        {% endif %}
+
+        {% if news_list %}
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+                {% for news in news_list %}
+                    <div class="col">
+                        <div class="card h-100 news-card">
+                            {% if news.image_url %}
+                                <img src="{{ news.image_url }}" class="card-img-top" alt="{{ news.title }}">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ news.title }}</h5>
+                                <p class="card-text">{{ news.summary|truncatewords:30 }}</p>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> {{ news.published_at|date:"d M Y" }}
+                                    </small>
+                                    <a href="{% url 'newsfinance:news_detail' news.slug %}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        Read More
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                    <i class="fas fa-chevron-left"></i> Previous
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                    Next <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No news articles available in this category at the moment.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

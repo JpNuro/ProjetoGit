@@ -1,0 +1,106 @@
+{% extends 'newsfinance/base.html' %}
+
+{% block title %}{{ news.title }} - News & Finance{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <!-- News Article -->
+        <article class="card">
+            {% if news.image_url %}
+                <img src="{{ news.image_url }}" class="card-img-top" alt="{{ news.title }}">
+            {% endif %}
+            <div class="card-body">
+                <h1 class="card-title mb-3">{{ news.title }}</h1>
+                
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="text-muted">
+                        <small>
+                            <i class="fas fa-user"></i> By {{ news.author.get_full_name|default:news.author.username }}
+                        </small>
+                        <small class="ms-3">
+                            <i class="fas fa-clock"></i> {{ news.published_at|date:"d M Y H:i" }}
+                        </small>
+                    </div>
+                    <a href="{% url 'newsfinance:news_by_category' news.category.slug %}" 
+                       class="badge bg-primary text-decoration-none">
+                        {{ news.category.name }}
+                    </a>
+                </div>
+
+                <div class="card-text mb-4">
+                    <h5 class="text-muted mb-3">{{ news.summary }}</h5>
+                    {{ news.content|safe|linebreaks }}
+                </div>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-link"></i> Source: 
+                    <a href="{{ news.source_url }}" target="_blank" rel="noopener noreferrer">
+                        {{ news.source.name }}
+                    </a>
+                </div>
+            </div>
+        </article>
+
+        <!-- Social Share Buttons -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">Share this article</h5>
+                <div class="d-flex gap-2">
+                    <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ news.title|urlencode }}"
+                       class="btn btn-outline-primary" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-twitter"></i> Twitter
+                    </a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}"
+                       class="btn btn-outline-primary" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-facebook"></i> Facebook
+                    </a>
+                    <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}&title={{ news.title|urlencode }}"
+                       class="btn btn-outline-primary" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-linkedin"></i> LinkedIn
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Related News -->
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Related News</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for related_news in news.category.news_set.all|slice:":5" %}
+                    {% if related_news != news %}
+                        <a href="{% url 'newsfinance:news_detail' related_news.slug %}" 
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ related_news.title }}</h6>
+                                <small class="text-muted">
+                                    {{ related_news.published_at|date:"d M" }}
+                                </small>
+                            </div>
+                            <small class="text-muted">{{ related_news.summary|truncatewords:20 }}</small>
+                        </a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Category Info -->
+        <div class="card mt-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">About {{ news.category.name }}</h5>
+            </div>
+            <div class="card-body">
+                <p>{{ news.category.description }}</p>
+                <a href="{% url 'newsfinance:news_by_category' news.category.slug %}" 
+                   class="btn btn-primary">
+                    View All {{ news.category.name }} News
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
