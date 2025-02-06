@@ -3,6 +3,7 @@ import itertools
 import random
 from time import sleep
 import os
+import matplotlib.pyplot as plt
 
 @abstractmethod
 
@@ -78,19 +79,35 @@ class  CassaNiquel:
     
     def play(self, amount_bet, player: Player):
         result = self._get_final_result()
-        self._display(amount_bet, result)
+        # self._display(amount_bet, result)
         self._update_balance(amount_bet, result, player)
 
+    @property
+    def gain(self):
+        return self.initial_balance + self.balance
 
 
 
 
+maquina1 = CassaNiquel(level=3)
 
+JOGADORES_POR_DIA = 100
+APOSTAS_POR_DIA = 20
+DIAS = 365
+VALOR_MAXIMO = 200
 
-maquina1 = CassaNiquel(level=1)
-player1 = Player(balance=1000)
-# for i in range(0, 100):
-#     maquina1.play(10, player1)
-maquina1.play(10, player1)
-print(player1.balance)
-print(maquina1.balance)
+saldo = []
+
+players = [Player() for i in range(JOGADORES_POR_DIA)]
+print(players)
+
+for i in range(0, DIAS):
+    for j in players:
+        for k in range(0, random.randint(1, APOSTAS_POR_DIA)):
+            maquina1.play(random.randint(5, VALOR_MAXIMO), j)
+    saldo.append(maquina1.gain)
+
+plt.figure()
+x = (i for i in range(1, DIAS+1))
+plt.plot(x, saldo)
+plt.show()
